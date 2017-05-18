@@ -5,10 +5,6 @@
   "companyName": "GitHub, Inc.",
   "version": "0.5.8",
   "main": "./dist/main.js",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/desktop/desktop.git"
-  },
   "description": "Extend your GitHub workflow beyond your browser with GitHub Desktop",
   "author": {
     "name": "GitHub, Inc.",
