@@ -13,7 +13,7 @@ const getVersion: () => string = distInfo.getVersion
 const getExecutableName: () => string = distInfo.getExecutableName
 
 const projectRoot = path.join(__dirname, '..')
-const outRoot = path.join(projectRoot, 'out')
+const outRoot = path.join(projectRoot, 'app', 'dist')
 
 const isPublishableBuild = getReleaseChannel() !== 'development'
 
@@ -22,20 +22,11 @@ console.log(`Building for ${getReleaseChannel()}…`)
 console.log('Removing old distribution…')
 fs.removeSync(path.join(projectRoot, 'dist'))
 
-console.log('Copying dependencies…')
-copyDependencies()
-
 console.log('Packaging emoji…')
 copyEmoji()
 
 console.log('Copying static resources…')
 copyStaticResources()
-
-const isFork = process.env.TRAVIS_SECURE_ENV_VARS !== 'true'
-if (process.platform === 'darwin' && process.env.TRAVIS && !isFork) {
-  console.log('Setting up keychain…')
-  cp.execSync(path.join(__dirname, 'setup-macos-keychain'))
-}
 
 console.log('Updating our licenses dump…')
 updateLicenseDump(err => {
@@ -50,99 +41,7 @@ updateLicenseDump(err => {
       return
     }
   }
-
-  console.log('Packaging…')
-  packageApp((err, appPaths) => {
-    if (err) {
-      console.error(err)
-      process.exit(1)
-    } else {
-      console.log(`Built to ${appPaths}`)
-    }
-  })
 })
-
-/**
- * The additional packager options not included in the existing typing.
- *
- * See https://github.com/desktop/desktop/issues/2429 for some history on this.
- */
-interface IPackageAdditionalOptions {
-  readonly protocols: ReadonlyArray<{
-    readonly name: string
-    readonly schemes: ReadonlyArray<string>
-  }>
-}
-
-function packageApp(
-  callback: (error: Error | null, appPaths: string | string[]) => void
-) {
-  // not sure if this is needed anywhere, so I'm just going to inline it here
-  // for now and see what the future brings...
-  const toPackagePlatform = (platform: NodeJS.Platform) => {
-    if (platform === 'win32' || platform === 'darwin' || platform === 'linux') {
-      return platform
-    }
-    throw new Error(
-      `Unable to convert to platform for electron-packager: '${process.platform}`
-    )
-  }
-
-  const options: packager.Options & IPackageAdditionalOptions = {
-    name: getExecutableName(),
-    platform: toPackagePlatform(process.platform),
-    arch: 'x64',
-    asar: false, // TODO: Probably wanna enable this down the road.
-    out: path.join(projectRoot, 'dist'),
-    icon: path.join(projectRoot, 'app', 'static', 'logos', 'icon-logo'),
-    dir: outRoot,
-    overwrite: true,
-    tmpdir: false,
-    derefSymlinks: false,
-    prune: false, // We'll prune them ourselves below.
-    ignore: [
-      new RegExp('/node_modules/electron($|/)'),
-      new RegExp('/node_modules/electron-packager($|/)'),
-      new RegExp('/\\.git($|/)'),
-      new RegExp('/node_modules/\\.bin($|/)'),
-    ],
-    appCopyright: 'Copyright © 2017 GitHub, Inc.',
-
-    // macOS
-    appBundleId: distInfo.getBundleID(),
-    appCategoryType: 'public.app-category.developer-tools',
-    osxSign: true,
-    protocols: [
-      {
-        name: distInfo.getBundleID(),
-        schemes: [
-          isPublishableBuild
-            ? 'x-github-desktop-auth'
-            : 'x-github-desktop-dev-auth',
-          'x-github-client',
-          'github-mac',
-        ],
-      },
-    ],
-
-    // Windows
-    win32metadata: {
-      CompanyName: distInfo.getCompanyName(),
-      FileDescription: '',
-      OriginalFilename: '',
-      ProductName: distInfo.getProductName(),
-      InternalName: distInfo.getProductName(),
-    },
-  }
-
-  packager(options, (err: Error, appPaths: string | string[]) => {
-    if (err) {
-      callback(err, appPaths)
-    } else {
-      callback(null, appPaths)
-    }
-  })
-}
 
 function removeAndCopy(source: string, destination: string) {
   fs.removeSync(destination)

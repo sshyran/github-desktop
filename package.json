@@ -1,8 +1,4 @@
 {
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/desktop/desktop.git"
-  },
   "description": "GitHub Desktop build dependencies",
   "scripts": {
     "test:integration": "cross-env TEST_ENV=1 ELECTRON_NO_ATTACH_CONSOLE=1 xvfb-maybe mocha -t 10000 --compilers ts:ts-node/register,tsx:ts-node/register app/test/integration/*.ts",
@@ -10,6 +6,9 @@
     "test": "npm run test:unit && npm run test:integration",
     "test:setup": "ts-node script/test-setup.ts",
     "test:review": "ts-node script/test-review.ts",
+    "build:dir": "npm run build:prod && build --dir",
+    "dist": "npm run build:prod && build",
+    "release": "npm run build:prod && build",
     "postinstall": "cd app && npm install && cd .. && git submodule update --recursive --init && npm run compile:tslint",
     "start": "cross-env NODE_ENV=development node script/start",
     "start:prod": "cross-env NODE_ENV=production node script/start",
@@ -39,6 +38,56 @@
   "engines": {
     "node": ">= 7",
     "npm": ">= 4"
+  },
+  "build": {
+    "productName": "GithubDesktop",
+    "appId": "com.github.GithubClient",
+    "asar": false,
+    "dmg": {
+      "contents": [
+        {
+          "x": 410,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        },
+        {
+          "x": 130,
+          "y": 150,
+          "type": "file"
+        }
+      ]
+    },
+    "protocols": [
+      {
+        "name": "github",
+        "role": "Viewer",
+        "schemes": [
+          "x-github-client",
+          "github-mac"
+        ]
+      }
+    ],
+    "files": [
+      "dist/",
+      "node_modules/",
+      "package.json"
+    ],
+    "mac": {
+      "icon": "app/icons/icon.icns"
+    },
+    "win": {
+      "icon": "app/icons/icon.ico"
+    },
+    "linux": {
+      "icon": "app/icons",
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    },
+    "extraResources": [
+    ]
   },
   "dependencies": {
     "awesome-typescript-loader": "^3.1.2",
@@ -87,6 +136,9 @@
     "xvfb-maybe": "^0.2.1"
   },
   "devDependencies": {
+    "electron": "1.6.11",
+    "electron-builder": "19.5.0",
+    "electron-mocha": "3.3.0",
     "@types/chai": "^4.0.3",
     "@types/chai-datetime": "0.0.30",
     "@types/classnames": "^2.2.2",
