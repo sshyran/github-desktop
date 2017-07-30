@@ -8,5 +8,9 @@ if (process.platform === 'linux') {
 }
 
 console.log(`executing ${cmd}`)
-const result = exec(cmd)
-console.log(result)
+try {
+  const result = exec(cmd)
+  console.log(result)
+} catch (e) {
+  console.log(e)
+}
