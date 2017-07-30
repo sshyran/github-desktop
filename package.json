@@ -87,7 +87,7 @@
     "linux": {
       "icon": "app/icons",
       "target": [
-        "apk"
+        "snap"
       ]
     },
     "extraResources": []
