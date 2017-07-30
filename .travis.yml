@@ -46,7 +46,7 @@ install:
   - npm prune
 
 script:
-  - npm run docker-build
+  - travis_wait 60 npm run docker-build
   - npm run check-prettiness
   - npm run lint
   - npm run test:setup
