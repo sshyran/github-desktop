@@ -87,9 +87,7 @@
     "linux": {
       "icon": "app/icons",
       "target": [
-        "AppImage",
-        "deb",
-        "rpm"
+        "apk"
       ]
     },
     "extraResources": [
