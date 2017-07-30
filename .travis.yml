@@ -20,16 +20,15 @@ matrix:
         - docker
       before_install:
         - docker pull electronuserland/electron-builder
-
-addons:
-  apt:
-    packages:
-      - libgnome-keyring-dev
-      - icnsutils
-      - graphicsmagick
-      - xz-utils
-      - libsecret-1-dev
-      - rpm
+      addons:
+        apt:
+          packages:
+            - libgnome-keyring-dev
+            - icnsutils
+            - graphicsmagick
+            - xz-utils
+            - libsecret-1-dev
+            - rpm
 
 language: c
 
