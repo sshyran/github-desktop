@@ -9,12 +9,8 @@ if (process.platform === 'linux') {
 
 console.log(`executing ${cmd}`)
 try {
-  const wakeLock = setInterval(() => {
-    console.log('building')
-  }, 5000)
   const result = exec(cmd)
   console.log(result)
-  clearInterval(wakeLock)
 } catch (e) {
   console.log(e.stderr.toString())
 }
