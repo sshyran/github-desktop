@@ -4,13 +4,13 @@ let cmd = 'npm install && npm run release'
 
 if (process.platform === 'linux') {
   cmd =
-    'docker run --rm -i -v ${PWD}:/project -v ${PWD##*/}-node-modules:/project/node_modules -v ~/.electron:/root/.electron electronuserland/electron-builder /bin/bash -c "apt-get update && apt-get install -y libsecret-1-dev && npm install -g npm@4.6.1 && npm install && npm run release"'
+    'docker run --rm -i -v ${PWD}:/project -v ${PWD##*/}-node-modules:/project/node_modules -v ~/.electron:/root/.electron electronuserland/electron-builder -v ${pwd}/dist:/project/dist /bin/bash -c "apt-get update && apt-get install -y libsecret-1-dev && npm install -g npm@4.6.1 && npm install && npm run release"'
 }
 
 console.log(`executing ${cmd}`)
 try {
   const result = exec(cmd)
-  console.log(result)
+  console.log(result.toString())
 } catch (e) {
   console.log(e.stderr.toString())
 }
