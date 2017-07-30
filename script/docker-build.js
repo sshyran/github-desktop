@@ -1,6 +1,6 @@
 const exec = require('child_process').execSync
 
-let cmd = 'npm run release'
+let cmd = 'npm install && npm run release'
 
 if (process.platform === 'linux') {
   cmd =
