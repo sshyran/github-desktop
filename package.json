@@ -13,6 +13,7 @@
     "pack-linux": "build -l",
     "pack-mac": "build -m",
     "pack-win": "build -w",
+    "docker-build": "node script/docker-build",
     "postinstall": "cd app && npm install && cd .. && git submodule update --recursive --init && npm run compile:tslint",
     "start": "cross-env NODE_ENV=development node script/start",
     "start:prod": "cross-env NODE_ENV=production node script/start",
