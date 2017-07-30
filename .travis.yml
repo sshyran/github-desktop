@@ -45,7 +45,6 @@ install:
   - nvm install 8
   - npm prune
   - cd app && npm prune && cd ..
-  - npm install
 
 script:
   - npm run docker-build
