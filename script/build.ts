@@ -1,16 +1,13 @@
 /* tslint:disable:no-sync-functions */
 
 import * as path from 'path'
-import * as cp from 'child_process'
 import * as fs from 'fs-extra'
-import * as packager from 'electron-packager'
 
 const legalEagle: LegalEagle = require('legal-eagle')
 
 const distInfo = require('./dist-info')
 const getReleaseChannel: () => string = distInfo.getReleaseChannel
 const getVersion: () => string = distInfo.getVersion
-const getExecutableName: () => string = distInfo.getExecutableName
 
 const projectRoot = path.join(__dirname, '..')
 const outRoot = path.join(projectRoot, 'app', 'dist')
@@ -68,93 +65,6 @@ function copyStaticResources() {
     fs.copySync(platformSpecific, destination)
   }
   fs.copySync(common, destination, { clobber: false })
-}
-
-function copyDependencies() {
-  const originalPackage: Package = require(path.join(
-    projectRoot,
-    'app',
-    'package.json'
-  ))
-
-  const commonConfig = require(path.resolve(__dirname, '../app/webpack.common'))
-  const externals = commonConfig.externals
-  const oldDependencies = originalPackage.dependencies
-  const newDependencies: PackageLookup = {}
-
-  for (const name of Object.keys(oldDependencies)) {
-    const spec = oldDependencies[name]
-    if (externals.indexOf(name) !== -1) {
-      newDependencies[name] = spec
-    }
-  }
-
-  const oldDevDependencies = originalPackage.devDependencies
-  const newDevDependencies: PackageLookup = {}
-
-  if (!isPublishableBuild) {
-    for (const name of Object.keys(oldDevDependencies)) {
-      const spec = oldDevDependencies[name]
-      if (externals.indexOf(name) !== -1) {
-        newDevDependencies[name] = spec
-      }
-    }
-  }
-
-  // The product name changes depending on whether it's a prod build or dev
-  // build, so that we can have them running side by side.
-  const updatedPackage = Object.assign({}, originalPackage, {
-    productName: distInfo.getProductName(),
-    dependencies: newDependencies,
-    devDependencies: newDevDependencies,
-  })
-
-  if (isPublishableBuild) {
-    delete updatedPackage.devDependencies
-  }
-
-  fs.writeFileSync(
-    path.join(outRoot, 'package.json'),
-    JSON.stringify(updatedPackage)
-  )
-
-  fs.removeSync(path.resolve(outRoot, 'node_modules'))
-
-  if (
-    Object.keys(newDependencies).length ||
-    Object.keys(newDevDependencies).length
-  ) {
-    console.log('  Installing npm dependencies…')
-    cp.execSync('npm install', { cwd: outRoot, env: process.env })
-  }
-
-  if (!isPublishableBuild) {
-    console.log(
-      '  Installing 7zip (dependency for electron-devtools-installer)'
-    )
-
-    const sevenZipSource = path.resolve(projectRoot, 'app/node_modules/7zip')
-    const sevenZipDestination = path.resolve(outRoot, 'node_modules/7zip')
-
-    fs.mkdirpSync(sevenZipDestination)
-    fs.copySync(sevenZipSource, sevenZipDestination)
-  }
-
-  console.log('  Copying git environment…')
-  const gitDir = path.resolve(outRoot, 'git')
-  fs.removeSync(gitDir)
-  fs.mkdirpSync(gitDir)
-  fs.copySync(path.resolve(projectRoot, 'app/node_modules/dugite/git'), gitDir)
-
-  if (process.platform === 'darwin') {
-    console.log('  Copying app-path binary...')
-    const appPathMain = path.resolve(outRoot, 'main')
-    fs.removeSync(appPathMain)
-    fs.copySync(
-      path.resolve(projectRoot, 'app/node_modules/app-path/main'),
-      appPathMain
-    )
-  }
 }
 
 function updateLicenseDump(callback: (err: Error | null) => void) {
